@@ -4461,6 +4461,7 @@ class DataType(Expression):
         NCHAR = auto()
         NESTED = auto()
         NULL = auto()
+        NULLABLE = auto()
         NUMMULTIRANGE = auto()
         NUMRANGE = auto()
         NVARCHAR = auto()
