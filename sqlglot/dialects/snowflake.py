@@ -426,6 +426,7 @@ class Snowflake(Dialect):
                 this=seq_get(args, 0), expression=dialect.to_json_path(seq_get(args, 1))
             ),
             "IFF": exp.If.from_arg_list,
+            "HEX_DECODE_STRING": exp.Unhex.from_arg_list,
             "LAST_DAY": lambda args: exp.LastDay(
                 this=seq_get(args, 0), unit=map_date_part(seq_get(args, 1))
             ),
@@ -466,7 +467,10 @@ class Snowflake(Dialect):
             "TO_TIMESTAMP_LTZ": _build_datetime("TO_TIMESTAMP_LTZ", exp.DataType.Type.TIMESTAMPLTZ),
             "TO_TIMESTAMP_NTZ": _build_datetime("TO_TIMESTAMP_NTZ", exp.DataType.Type.TIMESTAMP),
             "TO_TIMESTAMP_TZ": _build_datetime("TO_TIMESTAMP_TZ", exp.DataType.Type.TIMESTAMPTZ),
-            "TO_VARCHAR": exp.ToChar.from_arg_list,
+            "TO_CHAR": exp.ToChar.from_arg_list,
+            "TO_VARCHAR": lambda args: exp.Decode(
+                this=seq_get(args, 0), replace=seq_get(args, 1), charset=exp.Literal.string("utf-8")
+            ),
             "ZEROIFNULL": _build_if_from_zeroifnull,
         }
 
@@ -983,6 +987,8 @@ class Snowflake(Dialect):
             exp.TsOrDsToTime: lambda self, e: self.func(
                 "TRY_TO_TIME" if e.args.get("safe") else "TO_TIME", e.this, self.format_time(e)
             ),
+            exp.Unhex: rename_func("HEX_DECODE_STRING"),
+            exp.Decode: lambda self, e: self.func("TO_VARCHAR", e.this),
             exp.UnixToTime: rename_func("TO_TIMESTAMP"),
             exp.Uuid: rename_func("UUID_STRING"),
             exp.VarMap: lambda self, e: var_map_sql(self, e, "OBJECT_CONSTRUCT"),

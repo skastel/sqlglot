@@ -1112,6 +1112,7 @@ class TestPresto(Validator):
                 "duckdb": "DECODE(x)",
                 "presto": "FROM_UTF8(x)",
                 "spark": "DECODE(x, 'utf-8')",
+                "snowflake": "TO_VARCHAR(x)",
             },
         )
         self.validate_all(

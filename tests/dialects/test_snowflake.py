@@ -552,7 +552,7 @@ class TestSnowflake(Validator):
             "TO_CHAR(x, y)",
             read={
                 "": "TO_CHAR(x, y)",
-                "snowflake": "TO_VARCHAR(x, y)",
+                "snowflake": "TO_CHAR(x, y)",
             },
             write={
                 "": "CAST(x AS TEXT)",
@@ -564,6 +564,34 @@ class TestSnowflake(Validator):
                 "teradata": "TO_CHAR(x, y)",
             },
         )
+
+        self.validate_all(
+            "TO_VARCHAR(HEX_DECODE_STRING('c3a1'))",
+            read={
+                "": "DECODE(UNHEX('c3a1'), 'utf-8')",
+                "presto": "FROM_UTF8(FROM_HEX('c3a1'))",
+                "snowflake": "TO_VARCHAR(HEX_DECODE_STRING('c3a1'))",
+            },
+            write={
+                "": "DECODE(UNHEX('c3a1'), 'utf-8')",
+                "presto": "FROM_UTF8(FROM_HEX('c3a1'))",
+                "snowflake": "TO_VARCHAR(HEX_DECODE_STRING('c3a1'))",
+            },
+        )
+
+        self.validate_all(
+            "HEX_DECODE_STRING('c3a1')",
+            read={
+                "": "UNHEX('c3a1')",
+                "snowflake": "HEX_DECODE_STRING('c3a1')",
+            },
+            write={
+                "": "UNHEX('c3a1')",
+                "snowflake": "HEX_DECODE_STRING('c3a1')",
+                "presto": "FROM_HEX('c3a1')",
+            },
+        )
+
         self.validate_all(
             "SQUARE(x)",
             write={
